@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Das kleine 1×1 trainieren</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#f4f6fb; --card:#ffffff; --ink:#1f2540; --muted:#6a7090;
+    --brand:#4f6bff; --brand-dark:#3a52d6; --brand-soft:#e8ecff;
+    --ok:#1fa971; --ok-soft:#e3f7ee; --bad:#e5484d; --bad-soft:#fdecec;
+    --warn:#f59f0b; --warn-soft:#fff5e0; --line:#e3e6f0;
+    --radius:20px;
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+  html,body{margin:0}
+  body{
+    font-family:"Nunito",system-ui,-apple-system,sans-serif;
+    background:var(--bg); color:var(--ink);
+    padding:calc(16px + env(safe-area-inset-top)) calc(16px + env(safe-area-inset-right)) calc(32px + env(safe-area-inset-bottom)) calc(16px + env(safe-area-inset-left));
+    -webkit-text-size-adjust:100%;
+  }
+  .wrap{max-width:980px;margin:0 auto}
+  header{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin:8px 0 18px}
+  h1{font-size:clamp(26px,4vw,36px);font-weight:900;margin:0;letter-spacing:-.5px}
+  h1 span{color:var(--brand)}
+  .sub{color:var(--muted);margin:4px 0 0;font-size:17px}
+  .scorebox{background:var(--card);border-radius:var(--radius);padding:12px 18px;box-shadow:0 2px 0 var(--line);min-width:170px;text-align:center}
+  .scorebox .big{font-size:28px;font-weight:900}
+  .scorebox .lbl{font-size:13px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.06em}
+
+  .panel{background:var(--card);border-radius:var(--radius);padding:16px 18px;box-shadow:0 2px 0 var(--line);margin-bottom:18px}
+  .panel h2{font-size:17px;margin:0 0 10px;font-weight:800}
+  .chips{display:flex;flex-wrap:wrap;gap:8px}
+  .chip{
+    min-width:52px;height:48px;border-radius:14px;border:2px solid var(--line);background:#fff;
+    font:800 18px "Nunito",sans-serif;color:var(--ink);cursor:pointer;padding:0 12px;
+  }
+  .chip.on{background:var(--brand);border-color:var(--brand);color:#fff}
+  .chip.all{font-size:15px}
+  .hint{font-size:14px;color:var(--muted);margin:10px 0 0}
+
+  .progress{height:12px;background:var(--line);border-radius:99px;overflow:hidden;margin:0 0 18px}
+  .progress > div{height:100%;width:0;background:linear-gradient(90deg,var(--brand),#7b8cff);transition:width .3s}
+
+  .grid{display:grid;grid-template-columns:1fr;gap:14px}
+  @media (min-width:700px){.grid{grid-template-columns:1fr 1fr}}
+
+  .task{
+    background:var(--card);border-radius:var(--radius);padding:16px 18px;border:3px solid transparent;
+    box-shadow:0 2px 0 var(--line);transition:border-color .2s, background .2s;
+  }
+  .task.ok{border-color:var(--ok);background:var(--ok-soft)}
+  .task.bad{border-color:var(--bad)}
+  .task.empty{border-color:var(--warn)}
+  .row{display:flex;align-items:center;gap:12px}
+  .num{width:34px;height:34px;border-radius:50%;background:var(--brand-soft);color:var(--brand-dark);font-weight:900;display:grid;place-items:center;flex:none;font-size:16px}
+  .task.ok .num{background:var(--ok);color:#fff}
+  .task.bad .num{background:var(--bad);color:#fff}
+  .task.empty .num{background:var(--warn);color:#fff}
+  .eq{font-size:clamp(28px,4.2vw,34px);font-weight:900;white-space:nowrap;flex:1;display:flex;align-items:center;gap:10px}
+  .eq input{
+    width:110px;height:62px;font:900 30px "Nunito",sans-serif;text-align:center;color:var(--ink);
+    border:3px solid var(--line);border-radius:16px;background:#fff;outline:none;padding:0;
+    -moz-appearance:textfield;appearance:none;
+  }
+  .eq input:focus{border-color:var(--brand);box-shadow:0 0 0 4px var(--brand-soft)}
+  .eq input:disabled{background:transparent;border-color:transparent;color:var(--ok)}
+  .task.bad input{border-color:var(--bad);background:var(--bad-soft)}
+  .mark{font-size:28px;flex:none;width:34px;text-align:center}
+
+  .explain{margin-top:12px;border-top:2px dashed var(--line);padding-top:12px;font-size:17px;line-height:1.45;display:none}
+  .task.bad .explain,.task.empty .explain{display:block}
+  .explain p{margin:0 0 8px}
+  .diag{font-weight:800;color:var(--bad)}
+  .task.empty .diag{color:#b26f00}
+  .tip{background:var(--brand-soft);border-radius:14px;padding:10px 12px;margin:8px 0}
+  .tip b{color:var(--brand-dark)}
+  .steps{margin:6px 0 0;padding-left:0;list-style:none}
+  .steps li{font-weight:700;margin:3px 0;font-variant-numeric:tabular-nums}
+  .solution{background:#fff;border:2px solid var(--line);border-radius:14px;padding:10px 12px;margin-top:8px}
+  .solution .res{font-size:22px;font-weight:900;color:var(--ok)}
+  .dots{display:inline-grid;gap:4px;margin:8px 0 2px;padding:8px;background:#fafbff;border-radius:12px}
+  .dot{width:12px;height:12px;border-radius:50%;background:var(--brand)}
+  .dot.b{background:#ff9f43}
+  .dotcap{font-size:14px;color:var(--muted)}
+  .linkbtn{background:none;border:none;color:var(--brand-dark);font:800 16px "Nunito",sans-serif;padding:8px 0;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
+
+  .actions{display:flex;gap:12px;flex-wrap:wrap;margin:22px 0 10px;position:sticky;bottom:calc(10px + env(safe-area-inset-bottom));z-index:5}
+  .btn{
+    flex:1;min-width:200px;height:64px;border:none;border-radius:18px;font:900 21px "Nunito",sans-serif;cursor:pointer;
+    background:var(--brand);color:#fff;box-shadow:0 5px 0 var(--brand-dark);transition:transform .08s, box-shadow .08s;
+  }
+  .btn:active{transform:translateY(4px);box-shadow:0 1px 0 var(--brand-dark)}
+  .btn.sec{background:#fff;color:var(--ink);box-shadow:0 5px 0 var(--line);border:2px solid var(--line)}
+  .btn.sec:active{box-shadow:0 1px 0 var(--line)}
+
+  .result{display:none;text-align:center;padding:22px 18px}
+  .result.show{display:block}
+  .result .emoji{font-size:48px;line-height:1}
+  .result h2{font-size:26px;margin:8px 0 6px}
+  .result p{margin:0;color:var(--muted);font-size:17px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <h1>Das kleine <span>1×1</span></h1>
+      <p class="sub">Rechne alle 10 Aufgaben und tippe dann auf „Prüfen“.</p>
+    </div>
+    <div class="scorebox">
+      <div class="lbl">Richtig</div>
+      <div class="big" id="score">– / 10</div>
+    </div>
+  </header>
+
+  <section class="panel">
+    <h2>Welche Reihen möchtest du üben?</h2>
+    <div class="chips" id="chips"></div>
+    <p class="hint">Neue Auswahl gilt ab der nächsten Runde („Neue Aufgaben“).</p>
+  </section>
+
+  <div class="progress"><div id="bar"></div></div>
+
+  <section class="panel result" id="result"></section>
+
+  <main class="grid" id="tasks"></main>
+
+  <div class="actions">
+    <button class="btn" id="check">Prüfen</button>
+    <button class="btn sec" id="newset">Neue Aufgaben</button>
+  </div>
+</div>
+
+<script>
+(function(){
+  const N = 10;
+  let rows = new Set([1,2,3,4,5,6,7,8,9,10]);
+  let tasks = [];   // {a,b,state:'open'|'ok'|'bad'|'empty', tries, reveal}
+  let round = 0;
+
+  const $ = s => document.querySelector(s);
+  const chipsEl = $('#chips'), tasksEl = $('#tasks'), scoreEl = $('#score'),
+        barEl = $('#bar'), resultEl = $('#result'), checkBtn = $('#check');
+
+  /* ---------- Reihen-Auswahl ---------- */
+  function renderChips(){
+    chipsEl.innerHTML = '';
+    for(let i=1;i<=10;i++){
+      const c = document.createElement('button');
+      c.className = 'chip' + (rows.has(i)?' on':'');
+      c.textContent = i + 'er';
+      c.onclick = () => {
+        if(rows.has(i)){ if(rows.size>1) rows.delete(i); } else rows.add(i);
+        renderChips();
+      };
+      chipsEl.appendChild(c);
+    }
+    const all = document.createElement('button');
+    all.className = 'chip all';
+    all.textContent = rows.size===10 ? 'Alle ✓' : 'Alle';
+    all.onclick = () => { rows = new Set([1,2,3,4,5,6,7,8,9,10]); renderChips(); };
+    chipsEl.appendChild(all);
+  }
+
+  /* ---------- Aufgaben erzeugen ---------- */
+  function rnd(min,max){ return Math.floor(Math.random()*(max-min+1))+min; }
+  function makeTasks(){
+    const list = [...rows];
+    const seen = new Set();
+    const out = [];
+    let guard = 0;
+    while(out.length<N && guard<500){
+      guard++;
+      const r = list[rnd(0,list.length-1)];
+      let o = rnd(1,10);
+      if(o===1 && Math.random()<0.8) o = rnd(2,10);          // ×1 seltener
+      if(r===1 && list.length>1 && Math.random()<0.6) continue; // 1er-Reihe seltener
+      const swap = Math.random()<0.5;
+      const a = swap ? o : r, b = swap ? r : o;
+      const key = Math.min(a,b)+'x'+Math.max(a,b);
+      if(seen.has(key) && guard<300) continue;
+      seen.add(key);
+      out.push({a,b,state:'open',tries:0,reveal:false});
+    }
+    return out;
+  }
+
+  /* ---------- Rechenstrategien (Tipps) ---------- */
+  // liefert {title, text, steps[]} ; bei reveal=false wird das Endergebnis durch "?" ersetzt
+  function strategy(a,b,reveal){
+    const p = a*b;
+    const R = v => reveal ? v : '?';
+    const has = n => a===n || b===n;
+    const other = n => a===n ? b : a;
+
+    if(has(1)){
+      const o = other(1);
+      return {title:'Mal 1', text:`Wenn du eine Zahl <b>1-mal</b> nimmst, bleibt sie gleich.`,
+              steps:[`${a} · ${b} = ${R(p)}`]};
+    }
+    if(has(10)){
+      const o = other(10);
+      return {title:'Mal 10', text:`Bei <b>mal 10</b> hängst du einfach eine <b>0</b> an die andere Zahl an.`,
+              steps:[`${o} · 10 → ${o} mit einer 0 dahinter = ${R(p)}`]};
+    }
+    if(has(2)){
+      const o = other(2);
+      return {title:'Mal 2 = verdoppeln', text:`<b>Mal 2</b> heißt: Die Zahl wird verdoppelt (zur Zahl selbst dazurechnen).`,
+              steps:[`${o} + ${o} = ${R(p)}`]};
+    }
+    if(has(5)){
+      const o = other(5);
+      return {title:'Mal 5 = Hälfte von mal 10', text:`Rechne erst <b>mal 10</b>, dann nimm davon die <b>Hälfte</b>.`,
+              steps:[`${o} · 10 = ${o*10}`, `Hälfte von ${o*10} = ${R(p)}`]};
+    }
+    if(has(9)){
+      const o = other(9);
+      return {title:'Mal 9 = mal 10 minus einmal', text:`Rechne <b>mal 10</b> und nimm die Zahl dann <b>einmal weg</b>.`,
+              steps:[`${o} · 10 = ${o*10}`, `${o*10} − ${o} = ${R(p)}`]};
+    }
+    if(has(4)){
+      const o = other(4);
+      return {title:'Mal 4 = zweimal verdoppeln', text:`Verdopple die Zahl, und verdopple das Ergebnis noch einmal.`,
+              steps:[`${o} + ${o} = ${o*2}`, `${o*2} + ${o*2} = ${R(p)}`]};
+    }
+    if(a===b){
+      // Quadratzahlen 3·3, 6·6, 7·7, 8·8
+      if(a>=6){
+        return {title:'Zerlegen mit der 5', text:`Teile <b>${a}-mal</b> auf in <b>5-mal</b> und <b>${a-5}-mal</b>. Die 5er-Reihe kennst du gut!`,
+                steps:[`5 · ${a} = ${5*a}`, `${a-5} · ${a} = ${(a-5)*a}`, `${5*a} + ${(a-5)*a} = ${R(p)}`]};
+      }
+    }
+    // übrig: Kombinationen aus 3, 6, 7, 8
+    const big = Math.max(a,b), small = Math.min(a,b);
+    if(has(3)){
+      const o = other(3);
+      return {title:'Mal 3 = verdoppeln und einmal dazu', text:`Verdopple die Zahl (mal 2) und rechne sie dann noch <b>einmal dazu</b>.`,
+              steps:[`2 · ${o} = ${2*o}`, `${2*o} + ${o} = ${R(p)}`]};
+    }
+    if(has(8) && small>=6){
+      const o = other(8);
+      return {title:'Mal 8 = mal 10 minus zweimal', text:`Rechne <b>mal 10</b> und nimm die Zahl dann <b>zweimal weg</b>.`,
+              steps:[`${o} · 10 = ${o*10}`, `2 · ${o} = ${2*o}`, `${o*10} − ${2*o} = ${R(p)}`]};
+    }
+    // 6·7, 6·8, 7·6 ... → mit der 5 zerlegen
+    return {title:'Zerlegen mit der 5', text:`Teile <b>${big}-mal</b> auf in <b>5-mal</b> und <b>${big-5}-mal</b>. Die 5er-Reihe kennst du gut!`,
+            steps:[`5 · ${small} = ${5*small}`, `${big-5} · ${small} = ${(big-5)*small}`, `${5*small} + ${(big-5)*small} = ${R(p)}`]};
+  }
+
+  /* ---------- Fehler-Diagnose ---------- */
+  function diagnose(a,b,v){
+    const p = a*b;
+    if(v === p+b && a<10) return `Du hast eine Reihe zu viel gerechnet: Dein Ergebnis passt zu ${a+1} · ${b}. Gesucht ist aber ${a}-mal die ${b}.`;
+    if(v === p-b && a>1)  return `Dir fehlt eine Reihe: Dein Ergebnis passt zu ${a-1} · ${b}. Gesucht ist aber ${a}-mal die ${b}.`;
+    if(v === p+a && b<10) return `Du hast einmal zu viel gerechnet: Dein Ergebnis passt zu ${a} · ${b+1}. Gesucht ist ${a} · ${b}.`;
+    if(v === p-a && b>1)  return `Dir fehlt ein Schritt: Dein Ergebnis passt zu ${a} · ${b-1}. Gesucht ist ${a} · ${b}.`;
+    if(v === a+b && a+b!==p) return `Achtung: Du hast <b>plus</b> gerechnet (${a} + ${b} = ${a+b}). Das Zeichen · bedeutet <b>mal</b>.`;
+    if(p>=10 && v>=10 && v<100){
+      const s = String(p), t = String(v);
+      if(t === s[1]+s[0]) return `Das sieht nach einem <b>Zahlendreher</b> aus: Du hast die Ziffern vertauscht. Schreib zuerst die Zehner, dann die Einer.`;
+    }
+    if(p<10 && v === p*10) return `Du hast eine 0 zu viel angehängt. ${a} · ${b} ist kleiner als 10.`;
+    if(p%10===0 && v*10===p) return `Da fehlt eine 0 am Ende. Rechne noch einmal genau nach.`;
+    // Ergebnis gehört zu einer Nachbaraufgabe mit anderen Zahlen
+    const d = Math.abs(v-p);
+    if(d<=3) return `Knapp daneben! Dein Ergebnis ist um ${d} zu ${v>p?'groß':'klein'}. Vermutlich ein kleiner Rechenfehler beim Zusammenzählen.`;
+    if(v>p)  return `Dein Ergebnis ist zu groß. Überlege: ${a} · ${b} heißt ${a}-mal die ${b}.`;
+    return `Dein Ergebnis ist zu klein. Überlege: ${a} · ${b} heißt ${a}-mal die ${b}.`;
+  }
+
+  /* ---------- Punktefeld ---------- */
+  function dotField(a,b){
+    let html = `<div class="dots" style="grid-template-columns:repeat(${b},12px)">`;
+    for(let r=0;r<a;r++) for(let c=0;c<b;c++){
+      html += `<span class="dot${r>=5?' b':''}"></span>`;
+    }
+    html += `</div><div class="dotcap">${a} Reihen mit je ${b} Punkten${a>5?' (blau: die ersten 5 Reihen, orange: der Rest)':''}</div>`;
+    return html;
+  }
+
+  /* ---------- Darstellung ---------- */
+  function render(){
+    tasksEl.innerHTML = '';
+    tasks.forEach((t,i)=>{
+      const card = document.createElement('div');
+      card.className = 'task' + (t.state!=='open' ? ' '+t.state : '');
+      card.innerHTML = `
+        <div class="row">
+          <div class="num">${i+1}</div>
+          <div class="eq"><span>${t.a} · ${t.b} =</span>
+            <input type="text" inputmode="numeric" pattern="[0-9]*" autocomplete="off" maxlength="3"
+                   aria-label="Ergebnis von ${t.a} mal ${t.b}" data-i="${i}">
+          </div>
+          <div class="mark">${t.state==='ok'?'✅':t.state==='bad'?'❌':t.state==='empty'?'✏️':''}</div>
+        </div>
+        <div class="explain"></div>`;
+      const inp = card.querySelector('input');
+      inp.value = t.value ?? '';
+      if(t.state==='ok') inp.disabled = true;
+      inp.addEventListener('input', e=>{
+        e.target.value = e.target.value.replace(/\D/g,'');
+        t.value = e.target.value;
+      });
+      inp.addEventListener('keydown', e=>{
+        if(e.key==='Enter'){ e.preventDefault(); focusNext(i); }
+      });
+      if(t.state==='bad' || t.state==='empty') fillExplain(card.querySelector('.explain'), t, i);
+      tasksEl.appendChild(card);
+    });
+    updateScore();
+  }
+
+  function fillExplain(box, t, i){
+    const {a,b} = t, p = a*b;
+    if(t.state==='empty'){
+      const s = strategy(a,b,false);
+      box.innerHTML = `<p class="diag">Hier fehlt noch deine Antwort.</p>
+        <div class="tip"><b>Tipp – ${s.title}:</b> ${s.text}<ul class="steps">${s.steps.map(x=>`<li>${x}</li>`).join('')}</ul></div>`;
+      return;
+    }
+    const v = parseInt(t.value,10);
+    const s = strategy(a,b,t.reveal);
+    let html = `<p class="diag">${diagnose(a,b,v)}</p>
+      <div class="tip"><b>So kannst du rechnen – ${s.title}:</b> ${s.text}
+        <ul class="steps">${s.steps.map(x=>`<li>${x}</li>`).join('')}</ul></div>`;
+    if(t.reveal){
+      html += `<div class="solution">
+          <div class="res">${a} · ${b} = ${p}</div>
+          ${dotField(a,b)}
+          <p style="margin:6px 0 0">Probe mit der Tauschaufgabe: ${b} · ${a} ist ebenfalls ${p}.</p>
+        </div>
+        <p style="margin-top:8px">Trag jetzt das richtige Ergebnis ein und prüfe noch einmal.</p>`;
+    } else {
+      html += `<p>Verbessere dein Ergebnis oben und tippe noch einmal auf „Prüfen“.</p>
+        <button class="linkbtn" data-reveal="${i}">Lösung mit Bild anzeigen</button>`;
+    }
+    box.innerHTML = html;
+    const rb = box.querySelector('[data-reveal]');
+    if(rb) rb.onclick = () => { t.reveal = true; fillExplain(box,t,i); };
+  }
+
+  function focusNext(i){
+    const inputs = [...tasksEl.querySelectorAll('input:not(:disabled)')];
+    const idx = inputs.findIndex(x=>+x.dataset.i===i);
+    if(idx>-1 && idx<inputs.length-1) inputs[idx+1].focus();
+    else document.activeElement.blur();
+  }
+
+  function updateScore(){
+    const checked = tasks.some(t=>t.state!=='open');
+    const ok = tasks.filter(t=>t.state==='ok').length;
+    scoreEl.textContent = checked ? `${ok} / ${N}` : `– / ${N}`;
+    barEl.style.width = (ok/N*100)+'%';
+  }
+
+  /* ---------- Prüfen ---------- */
+  function check(){
+    tasks.forEach(t=>{
+      if(t.state==='ok') return;
+      const v = (t.value||'').trim();
+      if(v===''){ t.state='empty'; return; }
+      if(parseInt(v,10)===t.a*t.b){ t.state='ok'; }
+      else {
+        t.tries++;
+        t.state='bad';
+        if(t.tries>=2) t.reveal = true; // beim 2. Fehlversuch Lösung zeigen
+      }
+    });
+    render();
+    showResult();
+    const firstProblem = tasksEl.querySelector('.task.bad, .task.empty');
+    if(firstProblem) firstProblem.scrollIntoView({behavior:'smooth', block:'center'});
+    else resultEl.scrollIntoView({behavior:'smooth', block:'center'});
+  }
+
+  function showResult(){
+    const ok = tasks.filter(t=>t.state==='ok').length;
+    const bad = tasks.filter(t=>t.state==='bad').length;
+    const empty = tasks.filter(t=>t.state==='empty').length;
+    let emoji, head, text;
+    if(ok===N){
+      const firstTry = tasks.every(t=>t.tries===0);
+      emoji='🏆'; head = firstTry ? 'Alles richtig – auf Anhieb!' : 'Alles richtig!';
+      text = firstTry ? 'Super! Du kannst diese Aufgaben sicher. Hol dir neue Aufgaben.' : 'Stark, dass du deine Fehler verbessert hast. Probier gleich eine neue Runde!';
+      checkBtn.textContent = 'Prüfen';
+    } else {
+      emoji = ok>=7 ? '💪' : '🧠';
+      head = `${ok} von ${N} richtig`;
+      const parts = [];
+      if(bad) parts.push(`${bad} ${bad===1?'Aufgabe ist':'Aufgaben sind'} noch falsch`);
+      if(empty) parts.push(`${empty} ${empty===1?'Aufgabe ist':'Aufgaben sind'} noch leer`);
+      text = parts.join(' und ') + '. Lies die Erklärungen bei den roten Karten, verbessere und prüfe noch einmal.';
+      checkBtn.textContent = 'Nochmal prüfen';
+    }
+    resultEl.innerHTML = `<div class="emoji">${emoji}</div><h2>${head}</h2><p>${text}</p>`;
+    resultEl.classList.add('show');
+  }
+
+  function newRound(){
+    round++;
+    tasks = makeTasks();
+    resultEl.classList.remove('show');
+    checkBtn.textContent = 'Prüfen';
+    render();
+    window.scrollTo({top:0, behavior:'smooth'});
+  }
+
+  checkBtn.onclick = check;
+  $('#newset').onclick = newRound;
+
+  renderChips();
+  newRound();
+})();
+</script>
+</body>
+</html>
